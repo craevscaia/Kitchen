@@ -10,4 +10,6 @@ public class Order
     public bool OrderIsComplete { get; set; }
     public IList<int> FoodList { get; set; }
     public Status Status { get; set; } 
+    public DateTime CreatedOn { get; set; }
+    public DateTime UpdatedOn { get; set; }
 }
