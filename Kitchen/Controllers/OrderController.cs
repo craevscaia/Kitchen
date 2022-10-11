@@ -12,23 +12,23 @@ public class OrderController : Controller
 {
   
     private readonly IOrderService _orderService;
-    System.Threading.Mutex _mutey = null;
+   
     // GET
     public OrderController(IOrderService orderService)
     {
         _orderService = orderService;
     }
     [HttpPost]
-    public Task GetOrderFromKitchen([FromBody] Order? order)
+    public Task GetOrderFromDinningHall([FromBody] Order? order)
     {
         if (order == null) return Task.CompletedTask;
     
-        _orderService.InsertOrder(order);
-        _orderService.PrepareOrder();
+     
         try
         {
             Console.WriteLine($"An order with {order.Id} came in the kitchen");
-            // _orderService.InsertOrder(order);
+            _orderService.InsertOrder(order);
+            _orderService.PrepareOrder();
         }
         catch (Exception e)
         {

@@ -1,25 +1,31 @@
 using Kitchen.Models;
+using Kitchen.Services.CookingAparattusService;
 
 namespace Kitchen.Repository.FoodRepository;
 
 public class FoodRepository : IFoodRepository
 {
     private readonly IList<Food> _menu;
+    private readonly ICookingApparatusService _cookingApparatusService;
 
-    public FoodRepository()
+    public FoodRepository(ICookingApparatusService cookingApparatusService)
     {
+        _cookingApparatusService = cookingApparatusService;
         _menu = new List<Food>();
     }
 
-    public void GenerateFood()
+    public async Task GenerateFood()
     {
+        var oven = await _cookingApparatusService.GetCookingApparatusByName("Oven");
+        var stove  = await _cookingApparatusService.GetCookingApparatusByName("Stove");
+        
         _menu.Add(new Food
         {
             Id = 1,
             Name = "pizza",
             PreparationTime = 20,
             Complexity = 2,
-            CookingApparatus = CookingApparatus.Oven
+            CookingApparatus = oven
         });
         _menu.Add(new Food
         {
@@ -35,7 +41,7 @@ public class FoodRepository : IFoodRepository
             Name = "zeama",
             PreparationTime = 7,
             Complexity = 1,
-            CookingApparatus = CookingApparatus.Stove
+            CookingApparatus = stove
         });
         _menu.Add(new Food
         {
@@ -51,7 +57,7 @@ public class FoodRepository : IFoodRepository
             Name = "Island Duck with Mulberry Mustard",
             PreparationTime = 35,
             Complexity = 3,
-            CookingApparatus = CookingApparatus.Oven
+            CookingApparatus = oven
         });
         _menu.Add(new Food
         {
@@ -59,7 +65,7 @@ public class FoodRepository : IFoodRepository
             Name = "Waffles",
             PreparationTime = 10,
             Complexity = 1,
-            CookingApparatus = CookingApparatus.Stove
+            CookingApparatus = stove
         });
         _menu.Add(new Food
         {
@@ -67,7 +73,7 @@ public class FoodRepository : IFoodRepository
             Name = "Aubergine",
             PreparationTime = 20,
             Complexity = 2,
-            CookingApparatus = CookingApparatus.Oven
+            CookingApparatus = oven
         });
         _menu.Add(new Food
         {
@@ -75,7 +81,7 @@ public class FoodRepository : IFoodRepository
             Name = "Lasagna",
             PreparationTime = 30,
             Complexity = 2,
-            CookingApparatus = CookingApparatus.Oven
+            CookingApparatus = oven
         });
         _menu.Add(new Food
         {
@@ -83,7 +89,7 @@ public class FoodRepository : IFoodRepository
             Name = "Burger",
             PreparationTime = 15,
             Complexity = 1,
-            CookingApparatus = CookingApparatus.Stove
+            CookingApparatus = stove
         });
         _menu.Add(new Food
         {
@@ -115,7 +121,7 @@ public class FoodRepository : IFoodRepository
             Name = "Tobacco Chicken",
             PreparationTime = 30,
             Complexity = 2,
-            CookingApparatus = CookingApparatus.Oven 
+            CookingApparatus = oven 
         });
     }
 

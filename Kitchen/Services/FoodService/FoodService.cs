@@ -29,7 +29,7 @@ public class FoodService : IFoodService
         return _foodRepository.GetFoodById(id);
     }
 
-    public IList<Food> GetFoodFromOrder(IList<int> foodList)
+    public Task<IList<Food>> GetFoodFromOrder(IEnumerable<int> foodList)
     {
         var foods = new List<Food>();
         foreach (var foodId in foodList)
@@ -38,11 +38,11 @@ public class FoodService : IFoodService
             if (food != null) foods.Add(food);
         }
 
-        return foods;
+        return Task.FromResult<IList<Food>>(foods);
     }
     
-    public IEnumerable<Food> ArrangeFoodByComplexity(IList<Food> foods)
+    public Task<IEnumerable<Food>> ArrangeFoodByComplexity(IEnumerable<Food> foods)
     {
-        return foods.OrderByDescending(food => food.Complexity);
+        return Task.FromResult<IEnumerable<Food>>(foods.OrderByDescending(food => food.Complexity));
     }
 }

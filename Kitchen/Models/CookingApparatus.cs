@@ -1,7 +1,15 @@
 namespace Kitchen.Models;
 
-public enum CookingApparatus
+public class CookingApparatus
 {
-    Oven,
-    Stove
+    public int Id;
+    public string Name;
+    public bool IsBusy;
+
+    public CookingApparatus(int id, string name, bool isBusy)
+    {
+        Id = id;
+        IsBusy = isBusy;
+        Name = name;
+    }
 }

@@ -1,4 +1,4 @@
-using Kitchen;
+namespace Kitchen;
 
 public class Program
 {

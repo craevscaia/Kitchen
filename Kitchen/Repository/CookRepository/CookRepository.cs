@@ -18,7 +18,8 @@ public class CookRepository : ICookRepository
             Rank = 3,
             Proficiency = 4,
             Name = "Gordon Ramsay",
-            CatchPhrase = "Hey, panini head, are you listening to me?"
+            CatchPhrase = "Hey, panini head, are you listening to me?",
+            CookingList = new List<Food>()
         });
         _cookers.Add(new Cooker
         {
@@ -26,7 +27,8 @@ public class CookRepository : ICookRepository
             Rank = 2,
             Proficiency = 3,
             Name = "Margaretta Robinson",
-            CatchPhrase = "Hey, I will take the order?"
+            CatchPhrase = "Hey, I will take the order?",
+            CookingList = new List<Food>()
         });
         _cookers.Add(new Cooker
         {
@@ -34,7 +36,8 @@ public class CookRepository : ICookRepository
             Rank = 2,
             Proficiency = 2,
             Name = "Anette Rubik",
-            CatchPhrase = "I am busy, don't you see?"
+            CatchPhrase = "I am busy, don't you see?",
+            CookingList = new List<Food>()
         });
         _cookers.Add(new Cooker
         {
@@ -42,7 +45,8 @@ public class CookRepository : ICookRepository
             Rank = 1,
             Proficiency = 2,
             Name = "Eloi Musetti",
-            CatchPhrase = "I will do it!"
+            CatchPhrase = "I will do it!",
+            CookingList = new List<Food>()
         });
     }
     
@@ -51,9 +55,9 @@ public class CookRepository : ICookRepository
         return _cookers;
     }
 
-    public Task<Cooker?> GetCookerById(int id)
+    public Task<Cooker> GetCookerById(int id)
     {
-        return Task.FromResult(_cookers.FirstOrDefault(cooker => cooker.Id.Equals(id)));
+        return Task.FromResult(_cookers.FirstOrDefault(cooker => cooker.Id.Equals(id)))!;
     }
 
     public Task<Cooker?> GetCookerByRand(int foodComplexity)

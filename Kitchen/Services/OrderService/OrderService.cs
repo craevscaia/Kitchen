@@ -1,5 +1,8 @@
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.Net;
 using System.Text;
+using Kitchen.Helper;
 using Kitchen.Models;
 using Kitchen.Repository.OrderRepository;
 using Kitchen.Services.CookService;
@@ -13,12 +16,14 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly IFoodService _foodService;
     private readonly ICookService _cookService;
+    private Semaphore _semaphore;
 
     public OrderService(IOrderRepository orderRepository, IFoodService foodService, ICookService cookService)
     {
         _orderRepository = orderRepository;
         _foodService = foodService;
         _cookService = cookService;
+        _semaphore = new Semaphore(2, 2);
     }
 
     public void InsertOrder(Order order)
@@ -31,31 +36,55 @@ public class OrderService : IOrderService
        return _orderRepository.GetOrderByTableId(tableId);
     }
 
-    public IList<Order> GetAllOrders()
+    public ObservableCollection<Order> GetAllOrders()
     {
         return _orderRepository.GetAllOrders();
     }
     
     public async Task PrepareOrder()
     {
-        Console.WriteLine($"I received an order");
-        // here will be an mutex
-        var orders = GetAllOrders(); //1,2,3,4
-        var arrangedList = ArrangeOrderByPriority(orders).ToList(); // dupa priority;
-
-        foreach (var order in arrangedList)
+        while (true)
         {
-            Console.WriteLine($"I will cook order with {order.Id} that has {order.FoodList.Count}");
-            var foods = _foodService.GetFoodFromOrder(order.FoodList);
-            var arrangedFoodList = _foodService.ArrangeFoodByComplexity(foods).ToList();
-            await _cookService.SplitOrderToCooks(arrangedFoodList, new List<Task>());
-            await SendOrder(order);
+            var orders = await _orderRepository.GetOrdersToPrepare();
+            if (orders.Any())
+            {
+                var order = orders.FirstOrDefault();
+                if (order != null)
+                {
+                    var foodList = await _foodService.GetFoodFromOrder(order.FoodList);
+                    var foodsByComplexity = await _foodService.ArrangeFoodByComplexity(foodList);
+                    await Task.Run(async () =>
+                    {
+                        _semaphore.WaitOne();
+                        Console.WriteLine($"I started order with id {order.Id}, food list size: {foodsByComplexity.Count()}");
+                        await _cookService.SplitOrderToCooks(order, foodList, new Dictionary<int, List<Task>>());
+                        Console.WriteLine("I am released");
+                        order.FinishedOnUtc = DateTime.Now; // order time finished
+                        await SendOrder(order);
+                         await RemoveOrder(order);
+                         _semaphore.Release();
+
+                    });
+                    
+                }
+            }
+            else
+            {
+                // ConsoleHelper.Print("There are no orders");
+                await SleepingGenerator.Delay(1);
+                await PrepareOrder();
+            }
         }
+    }
+
+    private Task RemoveOrder(Order order)
+    {
+        _orderRepository.Orders.Remove(order);
+        return Task.FromResult(Task.CompletedTask);
     }
 
     private async Task SendOrder(Order order)
     {
-        await Task.Run(async () => { 
             try
             {
                 var serializeObject = JsonConvert.SerializeObject(order);
@@ -75,7 +104,6 @@ public class OrderService : IOrderService
             { 
                 Console.WriteLine($"Failed to send order {order.Id}", ConsoleColor.Red);
             }
-        });
     }
 
     private static IEnumerable<Order> ArrangeOrderByPriority(IEnumerable<Order> orders)
